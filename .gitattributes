@@ -1,0 +1,29 @@
+* text=auto
+
+*.py text eol=lf
+*.sh text eol=lf
+*.pbs text eol=lf
+*.cpp text eol=lf
+*.h text eol=lf
+*.hpp text eol=lf
+*.cmake text eol=lf
+CMakeLists.txt text eol=lf
+Makefile text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.fa text eol=lf
+*.fasta text eol=lf
+*.sto text eol=lf
+*.a2m text eol=lf
+*.dbn text eol=lf
+*.map text eol=lf
+*.bpmap text eol=lf
+
+*.pt binary
+*.ckpt binary
+*.npz binary
+*.npy binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary

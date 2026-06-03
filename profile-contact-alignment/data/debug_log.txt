@@ -1,0 +1,7 @@
+debug log:
+
+1. RNAlib中vrna_file_msa_read函数的RNAss有可能为空
+2. G-U basepair 值为0.9 or 0.1 ???
+3. CMakeFile.txt 中的PKG_CONFIG_PATH需要添加RNAlib2库的路径，否则Cmake报错。
+4. MSA处仍有bug。
+5. 多线程中对于Map B的所有信息需要使用local variable，这样才能保证比对结果正确,temseq应该用local变量。

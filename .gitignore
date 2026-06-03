@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Virtual environments
+.venv/
+venv/
+env/
+LModel/
+
+# Model weights and generated ML outputs
+RNA-ESM2/ckpt/*.pt
+RNA-ESM2/ckpt/*.ckpt
+RNA-ESM2/data/*.pt
+*.npz
+*.npy
+*_allmaps.bpmap
+*_mapdict.json
+*_seqdict.json
+*.tfrecords
+outputs/
+multirun/
+RNA-ESM2/fasta/*out/
+
+# CMake and compiled artifacts
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
+*.o
+*.o.d
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+profile-contact-alignment/bin/
+profile-contact-alignment/artifacts/
+
+# Local data and logs
+*.log
+tags
+.DS_Store
+Thumbs.db

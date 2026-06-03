@@ -1,0 +1,24 @@
+#######################################
+# File Name: test_tmp.sh
+# Author: hongxu
+# mail: hongxu@szbl.ac.cn
+#Created Time: Mon 15 Jan 2024 10:21:05 PM CST
+###############################
+#!/bin/bash
+
+# filepath=/lustre/home/xhong/PostDotWorks/2024/MARS/database/DB/
+# filepath=/mnt/hdd/xhong/yikun/BRAliBase2/fasta/
+filepath=/mnt/hdd/xhong/PostWork/2023/BPmap-LM/BRAliBASE2.1/k2/
+ls $filepath | while read i
+do
+    ls ${filepath}$i/*.raw.fa | while read j;
+    do
+	# echo python esm_profile_test_batch.py produce.seqfile=$j produce.outname=k2_${i}_${j%%.*}
+	python esm_profile_test_batch.py produce.seqfile=$j produce.outname=k2_${i}_${j##*/}
+	# echo python esm_profile_test_batch.py produce.seqfile=$j produce.outname=k2_${i}_${j##*/}
+        # if [ -f /mnt/hdd/xhong/PostWork/2023/BPmap-LM/BRAliBASE2.1/RNA-ESM2/k2/k2_${i}_${j##*/}_contacts.npz ];
+        # then
+        #     echo k2_${i}_${j##*/}
+        # fi
+    done
+done

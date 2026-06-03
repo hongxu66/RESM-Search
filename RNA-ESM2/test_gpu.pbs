@@ -1,0 +1,22 @@
+#!/bin/bash
+#SBATCH --job-name=test-gpu
+#SBATCH --partition=gpu-2
+#SBATCH --nodes=1
+##SBATCH --nodelist=gpu-2
+#SBATCH --ntasks-per-node=1
+#SBATCH --gres=gpu:1
+date
+module load cuda/cuda-10.2
+module load pytorch/pytorch-gpu-1.10.0-py37
+export TORCH_CUDA_ARCH_LIST="7.5"
+# source ../LModel/bin/activate
+# nvidia-smi
+#python esm_profile_test4.py produce.seqfile={seqfile} produce.outname={outname}
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2023/yikun/RNA-ESM2/3zd5_AB.fasta produce.outname=3zd5_AB
+#python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2023/yikun/RNA-ESM2/3zd5_AB.fasta produce.outname=3zd5_AB
+# python esm_profile_test_batch.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2023/BPmap-LM/NT/db/fasta_dir1/nt.part_1999.fasta produce.outname=nt.part_1999
+# python esm_profile_test_batch.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/RFAM/fasta/RF00499/allseqs.fasta produce.outname=RF00499
+# python esm_profile_test_batch.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/RFAM/fasta/RF01089/allseqs.fasta produce.outname=RF01089
+# python esm_profile_test_batch.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/RFAM/fasta/RF00001/allseqs.fasta produce.outname=RF00001
+python esm_profile_test_batch.py produce.seqfile=/home/yzhu/OpenfoldRNA/valdir11_test/R1116.fa produce.outname=R1116
+date

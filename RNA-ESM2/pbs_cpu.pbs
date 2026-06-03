@@ -1,0 +1,24 @@
+#!/bin/sh
+
+#PBS -N RNA-LM-Rfam
+
+# #PBS -q fat-1
+#PBS -q cu-1
+
+#PBS -l nodes=1:ppn=1 
+
+
+#PBS -V
+
+#PBS -S /bin/bash
+
+cd /lustre/home/xhong/PostDotWorks/2023/yikun/RNA-ESM2
+source ../LModel/bin/activate
+# python esm_profile_test2.py
+# python esm_profile_test3.py
+# python esm_profile_test.py
+# python esm_profile_test3.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2023/yikun/RNA-ESM2/All_IRES.fa produce.outname=All_IRES
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2023/BPmap-LM/RNAstrAlign/RMalignResults/allSeqs.fa produce.outname=RMalign_seqs
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2023/BPmap-LM/Pvalue/seqs/allseqs.fa produce.outname=Pvalue
+python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2023/BPmap-LM/xrRNA/PDB/5tpy.fa produce.outname=5tpy
+python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2023/BPmap-LM/xrRNA/PDB/5tpy.fa produce.outname=5tpy

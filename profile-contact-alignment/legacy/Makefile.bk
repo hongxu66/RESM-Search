@@ -1,0 +1,17 @@
+DD = g++ -O3  -std=c++0x
+RNAlib_LIBS = `pkg-config --cflags RNAlib2` `pkg-config --libs RNAlib2` 	
+OBJECT = load_data.o msa.o buildmap.o align.o main.o
+Main: $(OBJECT)
+	$(DD) $(OBJECT) $(RNAlib_LIBS) -o RESM_Search
+msa.o : msa.cpp msa.h global_variable.h
+	$(DD) -c msa.cpp
+buildmap.o : buildmap.cpp global_variable.h buildmap.h
+	$(DD) -c buildmap.cpp
+align.o : align.cpp msa.h align.h global_variable.h buildmap.h
+	$(DD) -c align.cpp 
+load_data.o : load_data.cpp global_variable.h load_data.h
+	$(DD) -c load_data.cpp 
+main.o : main.cpp msa.h align.h global_variable.h buildmap.h
+	$(DD) -c main.cpp
+clean:
+	rm -rf *.o

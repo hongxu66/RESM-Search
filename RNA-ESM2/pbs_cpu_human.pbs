@@ -1,0 +1,46 @@
+#!/bin/sh
+
+#PBS -N RNA-LM-Rfam
+
+#PBS -q fat-1
+
+#PBS -l nodes=1:ppn=1 
+
+
+#PBS -V
+
+#PBS -S /bin/bash
+
+cd /lustre/home/xhong/PostDotWorks/2023/yikun/RNA-ESM2
+source ../LModel/bin/activate
+# python esm_profile_test2.py
+# python esm_profile_test3.py
+# python esm_profile_test.py
+# python esm_profile_test3.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2023/yikun/RNA-ESM2/All_IRES.fa produce.outname=All_IRES
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2023/BPmap-LM/RNAstrAlign/RMalignResults/allSeqs.fa produce.outname=RMalign_seqs
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2023/BPmap-LM/Pvalue/seqs/allseqs.fa produce.outname=Pvalue
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr1.fasta produce.outname=chr1
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr2.fasta produce.outname=chr2
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr3.fasta produce.outname=chr3
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr4.fasta produce.outname=chr4
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr5.fasta produce.outname=chr5
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr6.fasta produce.outname=chr6
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr7.fasta produce.outname=chr7
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr8.fasta produce.outname=chr8
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr9.fasta produce.outname=chr9
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr10.fasta produce.outname=chr10
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr11.fasta produce.outname=chr11
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr12.fasta produce.outname=chr12
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr13.fasta produce.outname=chr13
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr14.fasta produce.outname=chr14
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr15.fasta produce.outname=chr15
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr16.fasta produce.outname=chr16
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr17.fasta produce.outname=chr17
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr18.fasta produce.outname=chr18
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr19.fasta produce.outname=chr19
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr20.fasta produce.outname=chr20
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr21.fasta produce.outname=chr21
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chr22.fasta produce.outname=chr22
+# python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chrX.fasta produce.outname=chrX
+python esm_profile_test4.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/humanGenome/latest/chrY.fasta produce.outname=chrY
+ 

@@ -1,0 +1,14 @@
+# CMake in-source build outputs
+/CMakeFiles/
+/CMakeCache.txt
+/cmake_install.cmake
+/install_manifest.txt
+
+# Compiled binaries and generated artifacts
+/bin/
+/artifacts/
+*.o
+*.o.d
+
+# Local editor/index files
+/tags

@@ -1,0 +1,16 @@
+#!/bin/bash
+#SBATCH --job-name=test-cpu
+#SBATCH --partition=fat-1
+#SBATCH --nodes=1
+##SBATCH --nodelist=fat-1
+#SBATCH --ntasks-per-node=1
+date 
+#module load cuda/cuda-10.2
+#module load pytorch/pytorch-gpu-1.10.0-py37
+#export TORCH_CUDA_ARCH_LIST="7.5"
+source ../LModel/bin/activate
+# nvidia-smi
+# python esm_profile_test_cpu.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2023/BPmap-LM/NT/db/fasta_dir1/nt.part_1999.fasta produce.outname=nt.part_1999
+# python esm_profile_test_cpu.py produce.seqfile=/lustre/home/xhong/PostDotWorks/2022/RFAM/fasta/RF00005/allseqs.fasta produce.outname=RF00005
+CUDA_VISIBLE_DEVICES=1 python esm2embatt_650M.py produce.seqfile=/mnt/hdd/xhong/yikun/RNA-ESM2/all_new_train.fa produce.outname=test
+date
