@@ -1,34 +1,34 @@
 # RESM-Search
 
-RESM-Search 是一个面向 RNA 同源序列搜索的项目。当前仓库包含三部分能力：
+RESM-Search is an RNA homologous sequence search project. It combines RNA language-model inference, contact-map/profile generation, and contact-map alignment/search algorithms. The database storage layer is planned, but the database files are not included in this repository yet.
 
-- RNA 语言模型推理与 contact map 预测：`RNA-ESM2/`
-- contact map 构建、比对和序列搜索算法：`profile-contact-alignment/`
-- 数据库存储与检索接口：规划中，当前数据库文件暂未放入仓库
+The typical workflow is:
 
-典型流程是：先用 RNA-ESM2 从 FASTA 序列预测 profile/contact map，再用 `profile-contact-alignment` 中的 C++ 程序构建或比对 contact map，最后根据比对分数筛选同源候选序列。
+1. Use `RNA-ESM2` to infer RNA profiles and contact maps from FASTA input.
+2. Use `profile-contact-alignment` to build or align contact maps.
+3. Rank candidate homologous sequences by alignment score or `BestScore`.
 
-## 目录结构
+## Repository Layout
 
 ```text
 RESM-Search/
-+-- RNA-ESM2/                    # RNA-ESM2 模型、推理脚本、训练脚本和示例 FASTA
-|   +-- rna_esm/                  # 本地 RNA-ESM/ESM 模型代码
-|   +-- evo/                      # MSA、tokenization、metrics 等辅助模块
-|   +-- fasta/                    # 示例/测试序列
-|   +-- ckpt/                     # 本地 checkpoint，默认不提交 Git
-|   +-- data/                     # 本地预训练权重，默认不提交 Git
-+-- profile-contact-alignment/    # contact map 比对与搜索 C++ 工具
-    +-- apps/                     # 命令行入口
-    +-- src/                      # 核心算法实现
-    +-- include/                  # 头文件
-    +-- scripts/                  # 构建、测试和 benchmark 脚本
-    +-- docs/                     # 子项目文档
++-- RNA-ESM2/                    # RNA-ESM2 model, inference scripts, training code, sample FASTA files
+|   +-- rna_esm/                 # Local RNA-ESM/ESM model code
+|   +-- evo/                     # MSA, tokenization, metrics, and helper modules
+|   +-- fasta/                   # Example and test sequences
+|   +-- ckpt/                    # Local checkpoints, ignored by Git
+|   +-- data/                    # Local pretrained weights and training data, ignored by Git
++-- profile-contact-alignment/   # C++ contact-map alignment and search tools
+    +-- apps/                    # Command-line entry points
+    +-- src/                     # Core algorithm implementation
+    +-- include/                 # Header files
+    +-- scripts/                 # Build, verification, and benchmark scripts
+    +-- docs/                    # Subproject notes
 ```
 
-## 环境要求
+## Requirements
 
-Python 侧：
+Python side:
 
 - Python 3.8+
 - PyTorch
@@ -43,33 +43,33 @@ Python 侧：
 - numba
 - transformers
 - tape-proteins
-- fair-esm 或本地可用的 `esm` 包
+- fair-esm, or another locally available `esm` package
 
-C++ 侧：
+C++ side:
 
-- C++11 编译器
+- C++11 compiler
 - CMake 3.0+
 - pkg-config
 - ViennaRNA / RNAlib2
-- OpenMP，推荐开启
+- OpenMP, recommended for parallel alignment
 
-如果 `pkg-config` 找不到 RNAlib2，需要设置 ViennaRNA 的 pkgconfig 路径：
+If `pkg-config` cannot find RNAlib2, set ViennaRNA's pkgconfig path:
 
 ```bash
 export PKG_CONFIG_PATH=/path/to/ViennaRNA/lib/pkgconfig:$PKG_CONFIG_PATH
 ```
 
-## 权重和数据准备
+## Model Weights and Data
 
-大模型权重、checkpoint、搜索数据库通常不适合直接提交 GitHub。本仓库的 `.gitignore` 默认排除这些文件：
+Large model weights, checkpoints, generated tensors, and search databases are not suitable for direct GitHub storage. This repository's `.gitignore` excludes common large artifacts, including:
 
 - `RNA-ESM2/ckpt/*.pt`
 - `RNA-ESM2/ckpt/*.ckpt`
 - `RNA-ESM2/data/*.pt`
 - `*.npz`, `*.npy`, `*_allmaps.bpmap`
-- C++ 编译产物和 Python 缓存
+- C++ build products and Python cache files
 
-运行模型推理前，请在本地准备所需权重。代码中常见默认路径包括：
+Prepare the required weights locally before running inference. Common paths referenced by scripts include:
 
 ```text
 RNA-ESM2/ckpt/RUNGPURNA-ESM2-trans-mappro-KDNY-epoch-30-step-15650.pt
@@ -78,24 +78,24 @@ RNA-ESM2/data/esm2_t30_150M_UR50D.pt
 RNA-ESM2/data/esm2_t33_650M_UR50D.pt
 ```
 
-数据库目录暂未纳入仓库。用户需要把待搜索的 genome/database FASTA 放到本地路径，并在命令中用 `-b`、`-genome` 或 `-database` 指定。
+Search database files are not included. Put genome or database FASTA files in a local path and pass that path with `-b`, `-genome`, or `-database`.
 
-## RNA-ESM2 推理
+## RNA-ESM2 Inference
 
-进入模型目录：
+Enter the model directory:
 
 ```bash
 cd RNA-ESM2
 ```
 
-预测 contact map 的常用脚本有：
+Common contact-map/profile inference scripts:
 
-- `esm2embatt_650M_con.py`：650M 配置，输出 contact map
-- `esm2embatt_150M_con.py`：150M 配置，输出 contact map
-- `esm_profile_test_batch.py`：批量测试/导出 profile 和 contacts
-- `esm_profile_test_cpu.py`：CPU 推理版本
+- `esm2embatt_650M_con.py`: 650M configuration with contact-map output
+- `esm2embatt_150M_con.py`: 150M configuration with contact-map output
+- `esm_profile_test_batch.py`: batch profile/contact export
+- `esm_profile_test_cpu.py`: CPU inference variant
 
-Hydra 参数可以直接在命令行覆盖：
+Hydra parameters can be overridden from the command line:
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python esm2embatt_650M_con.py \
@@ -105,26 +105,26 @@ CUDA_VISIBLE_DEVICES=0 python esm2embatt_650M_con.py \
   data.model_path=./ckpt/RUNGPURNA-ESM2-trans-mappro-KDNY-epoch-30-step-15650.pt
 ```
 
-常见输出：
+Common outputs:
 
-- `<outname>_allmaps.bpmap`：所有序列的 contact map 文本
-- `<outname>_mapdict.json`：序列 ID 到 map 的索引信息，部分脚本生成
-- `<outname>_seqdict.json`：序列 ID 到序列的映射，部分脚本生成
-- `<outname>_contacts.npz`：contact tensor，部分脚本生成
-- `<outname>_features.npz`：profile/feature tensor，部分脚本生成
+- `<outname>_allmaps.bpmap`: contact-map text for all sequences
+- `<outname>_mapdict.json`: sequence ID to map-index metadata
+- `<outname>_seqdict.json`: sequence ID to sequence mapping
+- `<outname>_contacts.npz`: contact tensor
+- `<outname>_features.npz`: profile or feature tensor
 
-注意：部分历史脚本内部带有硬编码输出目录，例如 `/mnt/remote_home/...`。换机器运行前，请检查脚本中的 `results_path`，或通过命令行参数/代码修改为本机可写目录。
+Some research scripts contain hard-coded historical cluster paths, such as `/mnt/remote_home/...`. Before running them on a new machine, check `results_path`, input paths, output paths, and checkpoint paths.
 
-## 模型训练
+## Model Training
 
-`RNA-ESM2/main.py` 是训练入口，使用 Hydra 管理参数。默认配置会读取：
+`RNA-ESM2/main.py` is the training entry point and uses Hydra configuration. Default training paths include:
 
 - `data.ffindex_path=data/UniRef30_2020_02_a3m`
 - `data.trrosetta_path=data/trrosetta`
 - `data.trrosetta_train_split=train.txt`
 - `data.trrosetta_valid_split=test.txt`
 
-示例：
+Example:
 
 ```bash
 cd RNA-ESM2
@@ -135,11 +135,11 @@ python main.py \
   train.max_epochs=100
 ```
 
-训练数据体量通常较大，请放在本地数据目录或外部存储中，不建议提交到 GitHub。
+Training datasets are usually large. Keep them in local storage, object storage, or institutional storage instead of committing them to GitHub.
 
-## 构建 contact map 比对工具
+## Build Contact-Map Alignment Tools
 
-进入 C++ 子项目：
+Enter the C++ subproject and build:
 
 ```bash
 cd profile-contact-alignment
@@ -147,22 +147,22 @@ cmake . -DCMAKE_BUILD_TYPE=Release
 cmake --build . -j 8
 ```
 
-二进制文件会生成到：
+Binaries are generated under:
 
 ```text
 profile-contact-alignment/bin/
 ```
 
-主要命令：
+Main commands:
 
-- `cmapbuild`：从 DBN/结构文件构建 contact map
-- `cmapsearch`：用 query 结构搜索 genome/database FASTA
-- `RESM_Search`：query 结构和目标序列的搜索/比对入口
-- `RESM_Search_align`：contact map/序列比对入口
-- `RESM_Search_alignNCBI`：NCBI 场景入口
-- `BPmap`：两个预计算 contact map 的直接比对
+- `cmapbuild`: build a contact-map model from DBN or structure input
+- `cmapsearch`: search genome/database FASTA files with a query structure
+- `RESM_Search`: search or align a query structure against target sequences
+- `RESM_Search_align`: contact-map or sequence alignment entry point
+- `RESM_Search_alignNCBI`: NCBI-oriented search entry point
+- `BPmap`: directly align two precomputed contact maps
 
-也可以使用子项目自带脚本：
+Useful helper scripts:
 
 ```bash
 scripts/build_and_test.sh
@@ -170,9 +170,9 @@ scripts/benchmark_performance.sh
 python scripts/verify_optimizations.py
 ```
 
-## 输入文件格式
+## Input Formats
 
-DBN 文件使用三行一组：
+DBN files use three lines per record:
 
 ```text
 >sequence_id
@@ -180,14 +180,14 @@ AUGCUAGCUA
 (((....)))
 ```
 
-FASTA 文件使用标准 FASTA 格式：
+FASTA files use standard FASTA format:
 
 ```text
 >sequence_id
 AUGCUAGCUA
 ```
 
-contact map 文件支持如下行：
+Contact-map files support:
 
 ```text
 LEN 100
@@ -195,96 +195,96 @@ CON 3 45 1.0
 PRF 0 A N 0.85 0.05 0.05 0.05
 ```
 
-规则：
+Rules:
 
-- `LEN` 或 `SIZE` 表示 map 长度
-- `CON i j score` 表示第 `i` 和 `j` 个位置之间的接触
-- `PRF` 是可选 profile 信息
-- 如果没有 `PRF`，`BPmap` 会用 `N` 占位打印序列/profile 相关输出
+- `LEN` or `SIZE` defines map length.
+- `CON i j score` defines a contact between positions `i` and `j`.
+- `PRF` provides optional profile information.
+- If `PRF` is missing, `BPmap` uses `N` as a fallback sequence/profile symbol.
 
-## 使用示例
+## Usage Examples
 
-从 DBN 构建 cmap：
+Build a cmap model from DBN:
 
 ```bash
 ./bin/cmapbuild -dbn query.dbn -o query.cmp
 ```
 
-从 DBN 和 MSA 构建 cmap：
+Build a cmap model from DBN plus MSA:
 
 ```bash
 ./bin/cmapbuild -dbn query.dbn -a2m query.a2m -o query.cmp
 ./bin/cmapbuild -dbn query.dbn -sto query.sto -o query.cmp
 ```
 
-搜索 genome FASTA：
+Search a genome FASTA file:
 
 ```bash
 ./bin/cmapsearch -dbn query.dbn -genome genome.fa
 ```
 
-搜索 database FASTA：
+Search a database FASTA file:
 
 ```bash
 ./bin/cmapsearch -dbn query.dbn -database database.fa
 ```
 
-使用 query DBN 与 target FASTA 做 RESM 搜索：
+Run RESM search with a query DBN and target FASTA:
 
 ```bash
 ./bin/RESM_Search -a query.dbn -b targets.fa -threads 8 -sep_cut 1
 ```
 
-直接比对两个预计算 contact map：
+Directly align two precomputed contact maps:
 
 ```bash
 ./bin/BPmap -a query.bpmap -b target.bpmap -threads 8 -use_prf
 ```
 
-常用参数：
+Common options:
 
-- `-a`：query RNA 二级结构或 contact map 文件
-- `-b`：target FASTA 或 contact map 文件
-- `-threads` / `-num_threads`：OpenMP 线程数，默认 `8`
-- `-gap_o`：gap opening penalty，默认 `-1`
-- `-gap_e`：gap extension penalty，默认 `-0.01`
-- `-sep_cut`：最小序列间隔过滤阈值，默认 `1`
-- `-iter`：迭代次数，默认 `20`
-- `-use_prf`：使用 profile 得分
-- `-prf_w`：profile 得分权重
-- `-use_gap_ss`：对二级结构区域使用 gap penalty 调整，默认开启
-- `-gap_ss_w`：二级结构 gap penalty 权重
-- `-silent`：减少日志输出
+- `-a`: query RNA secondary structure or contact-map file
+- `-b`: target FASTA or contact-map file
+- `-threads` / `-num_threads`: OpenMP thread count, default `8`
+- `-gap_o`: gap opening penalty, default `-1`
+- `-gap_e`: gap extension penalty, default `-0.01`
+- `-sep_cut`: minimum sequence-separation filter threshold, default `1`
+- `-iter`: iteration count, default `20`
+- `-use_prf`: enable profile scoring
+- `-prf_w`: profile score weight
+- `-use_gap_ss`: enable secondary-structure-aware gap adjustment
+- `-gap_ss_w`: secondary-structure gap penalty weight
+- `-silent`: reduce log output
 
-## 推荐工作流
+## Recommended Workflow
 
-1. 准备 query RNA 序列和结构，或准备 FASTA 序列。
-2. 用 `RNA-ESM2` 预测 profile/contact map。
-3. 用 `cmapbuild` 或预测得到的 `.bpmap` 生成 query map。
-4. 准备待搜索的 genome/database FASTA。
-5. 用 `cmapsearch`、`RESM_Search` 或 `BPmap` 进行比对。
-6. 根据输出的 alignment score/BestScore 排序，筛选候选同源序列。
+1. Prepare a query RNA sequence and structure, or prepare FASTA input.
+2. Use `RNA-ESM2` to infer profiles and contact maps.
+3. Use `cmapbuild` or generated `.bpmap` files to build the query map.
+4. Prepare genome/database FASTA files for the target search space.
+5. Run `cmapsearch`, `RESM_Search`, or `BPmap`.
+6. Rank candidates by alignment score or `BestScore`.
 
-## 注意事项
+## Notes
 
-- RNA 序列中的 `T` 会在部分读入逻辑中转换为 `U`。
-- 部分脚本是研究阶段脚本，包含历史集群路径或 PBS 脚本；迁移环境时需要先检查输入、输出和 checkpoint 路径。
-- 模型推理对显存要求较高。650M 模型建议使用 GPU；无 GPU 时使用 CPU 版本脚本或缩小 batch/序列长度。
-- GitHub 不适合存放数 GB 模型权重和数据库。建议把权重放在对象存储、网盘、Hugging Face、GitHub Release 或机构内部存储，并在 README/配置中记录下载地址。
+- `T` may be converted to `U` by some RNA input readers.
+- Some scripts are research-stage utilities and may include historical cluster paths or PBS settings. Check input, output, and checkpoint paths before use.
+- Model inference can require substantial GPU memory. Use the CPU script or reduce batch size/sequence length when GPU memory is limited.
+- Store large weights and databases outside GitHub, for example in object storage, shared storage, Hugging Face, GitHub Releases, or institutional storage. Record download locations in configuration or documentation.
 
-## 版本管理建议
+## Version-Control Rules
 
-建议提交到 GitHub 的内容：
+Recommended content to commit:
 
-- Python/C++ 源代码
-- 构建脚本和轻量测试脚本
-- 小型示例 FASTA/DBN
-- README 和文档
+- Python and C++ source code
+- Build scripts and lightweight verification scripts
+- Small example FASTA/DBN files
+- README and project documentation
 
-不建议提交的内容：
+Content that should not be committed:
 
-- `.pt` / `.ckpt` 模型权重
-- 大型 FASTA 数据库
-- `.npz` / `.npy` 推理结果
+- `.pt` / `.ckpt` model weights
+- Large FASTA databases
+- `.npz` / `.npy` inference outputs
 - `__pycache__`
-- CMake 构建目录、二进制文件、benchmark 产物
+- CMake build directories, binaries, and benchmark artifacts

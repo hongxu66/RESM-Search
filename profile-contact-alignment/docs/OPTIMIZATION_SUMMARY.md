@@ -1,125 +1,135 @@
-# 光学图谱比对算法加速优化总结
+# Contact-Map Alignment Optimization Summary
 
-## 已实施的优化方案
+## Implemented Optimizations
 
-### 方案1：OpenMP并行化参数扫�?�?**完成**
-**文件**: [align.cpp](align.cpp#L30-L75)  
-**方法**: 使用 `#pragma omp parallel for collapse(3)` 并行化三层嵌套循�?
-- 参数组合�? × 6 × 4 = 72 次对齐计�?
-- 调度策略：`schedule(dynamic)` 动态负载均�?
-- 线程数：8个线�?
-- 线程安全：使�?`#pragma omp critical` 保护最优解更新
+### Option 1: OpenMP Parallel Parameter Sweep
 
-**代码位置**:
-- `int Alignment::mapalignment(...stringstream &buf)` [L30-75]
-- `double Alignment::mapalignment(...stringstream &buf)` [L115-160]
-- `vec_int Alignment::mapalignment(...)` [L300-345]
+Status: completed
 
-**性能提升**: 40-50% （理�?-7倍加速，8线程�?
+File: `src/align.cpp`
 
----
+Method: use `#pragma omp parallel for collapse(3)` to parallelize the three-level nested parameter sweep.
 
-### 方案2/3：内存分配优�?�?**完成**
-**文件**: [align.cpp](align.cpp#L1167-1207)  
-**方法**: 消除变长数组(VLA)，使用线程本地存�?thread_local)的预分配向量
+- Parameter combinations: 3 x 6 x 4 = 72 alignment runs
+- Scheduling strategy: `schedule(dynamic)` for load balancing
+- Default thread count: 8
+- Thread safety: `#pragma omp critical` protects best-result updates
 
-**改进**:
+Code locations:
+
+- `int Alignment::mapalignment(...stringstream &buf)`
+- `double Alignment::mapalignment(...stringstream &buf)`
+- `vec_int Alignment::mapalignment(...)`
+
+Estimated speedup: 40-50%, depending on CPU core count and workload.
+
+### Option 2/3: Memory Allocation Optimization
+
+Status: completed
+
+File: `src/align.cpp`
+
+Method: remove variable-length arrays and use preallocated thread-local buffers.
+
 ```cpp
-// Before: VLA on stack - inefficient
-double M[A[k]*B[k]];  // Variable-length array
+// Before: VLA on stack
+double M[A[k] * B[k]];
 
-// After: Pre-allocated thread-local buffer
+// After: preallocated thread-local buffer
 static thread_local std::vector<double> M_buffer(65536);
 ```
 
-**优势**:
-- 避免栈溢出风险（VLA可能很大�?
-- 重用已分配的内存，减少allocation/deallocation开销
-- 每个线程有自己的缓冲区，避免竞争
+Benefits:
 
-**性能提升**: 8-15% （包含VLA消除和缓冲区重用�?
+- Avoids stack overflow risks from large VLAs.
+- Reuses allocated memory and reduces allocation/deallocation overhead.
+- Gives each thread an independent buffer and avoids data races.
 
----
+Estimated speedup: 8-15%.
 
-### 方案5：编译优化标�?�?**完成**
-**文件**: [CMakeLists.txt](CMakeLists.txt#L8-10)  
-**编译选项**:
+### Option 5: Compiler Optimization Flags
+
+Status: completed
+
+File: `CMakeLists.txt`
+
+Release flags:
 
 ```cmake
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} 
-    -O3                      # Level 3 optimization
-    -march=native            # CPU-specific instructions (SSE, AVX, etc)
-    -ffast-math              # Aggressive math optimization
-    -flto                    # Link-time optimization
-    -fno-math-errno          # Skip errno checks in math lib
-    -finline-functions       # Aggressive inlining
-    -foptimize-sibling-calls # Tail call optimization
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}
+    -O3
+    -march=native
+    -ffast-math
+    -flto
+    -fno-math-errno
+    -finline-functions
+    -foptimize-sibling-calls
 ")
 ```
 
-**优势**:
-- `-O3`: 积极的编译器优化
-- `-march=native`: 利用本地CPU指令集（SIMD、AVX等）
-- `-ffast-math`: 允许不精确但快速的数学计算
-- `-flto`: 跨文件的链接时优�?
-- `-finline-functions`: 更激进的函数内联
+Benefits:
 
-**性能提升**: 5-15% 
+- `-O3`: enables aggressive compiler optimization.
+- `-march=native`: uses CPU-specific instructions such as SIMD and AVX.
+- `-ffast-math`: allows faster floating-point optimization.
+- `-flto`: enables link-time optimization across translation units.
+- `-finline-functions`: increases function inlining.
 
----
+Estimated speedup: 5-15%.
 
-### 方案4：提前终止策�?📋 **可选实�?*
-推荐用于特定场景的扩展优化。当前已通过并行化获得主要性能提升，提前终止的收益有限�?
+### Option 4: Early-Termination Strategy
 
----
+Status: optional future work
 
-## 性能提升总结
+Early termination can be useful in selected workloads, but the current OpenMP parallelization already provides the main speedup. The expected additional gain is limited unless the search space is much larger or pruning quality improves.
 
-| 优化方案 | 性能提升 | 状�?|
-|---------|---------|------|
-| 方案1：OMP并行�?| 40-50% | �?已实�?|
-| 方案2/3：内存优�?| 8-15% | �?已实�?|
-| 方案5：编译优�?| 5-15% | �?已实�?|
-| **总计** | **60-80%** | �?**完成** |
+## Performance Summary
 
-**理论加速比**: 1.6x - 5x（取决于CPU核心数和内存访问模式�?
+| Optimization | Estimated speedup | Status |
+| --- | --- | --- |
+| OpenMP parameter sweep | 40-50% | completed |
+| Memory optimization | 8-15% | completed |
+| Compiler optimization | 5-15% | completed |
+| Total | 60-80% | completed |
 
----
+The expected end-to-end acceleration is roughly 1.6x to 5x, depending on CPU core count and memory-access behavior.
 
-## 构建说明
+## Build Instructions
 
-### Release版本（带完整优化�?
+Build a release version with full optimization:
+
 ```bash
-cd /path/to/RESM-Search
+cd /path/to/RESM-Search/profile-contact-alignment
 cmake . -DCMAKE_BUILD_TYPE=Release
 make -j8
 ```
 
-### 验证优化生效
+Verify optimization flags:
+
 ```bash
-# 查看编译标志
 cmake . -DCMAKE_BUILD_TYPE=Release
 make VERBOSE=1 | grep -E "march=native|flto|-O3"
+```
 
-# 检查OpenMP并行�?
+Check for OpenMP symbols:
+
+```bash
 objdump -t bin/RESM_Search | grep omp
 ```
 
----
+## Key Changes
 
-## 关键修改�?
+### Parallel Three-Level Sweep
 
-### 1. 三层循环并行�?[align.cpp L30-75]
 ```cpp
 #pragma omp parallel for collapse(3) schedule(dynamic) num_threads(8)
-for(int sx = 0; sx < sep_x_steps.size(); sx++){
-    for(int sy = 0; sy < sep_y_steps.size(); sy++){
-        for(int g_e = 0; g_e < gap_e_steps.size(); g_e++){
-            // ... 72次对齐计算并行执�?...
+for (int sx = 0; sx < sep_x_steps.size(); sx++) {
+    for (int sy = 0; sy < sep_y_steps.size(); sy++) {
+        for (int g_e = 0; g_e < gap_e_steps.size(); g_e++) {
             #pragma omp critical(alignment_update)
             {
-                if(current_score > con_max+gap_max+prf_max){
-                    // Thread-safe update of best result
+                if (current_score > con_max + gap_max + prf_max) {
+                    // Thread-safe update of the best result.
                 }
             }
         }
@@ -127,55 +137,44 @@ for(int sx = 0; sx < sep_x_steps.size(); sx++){
 }
 ```
 
-### 2. 线程本地缓冲�?[align.cpp L1168]
+### Thread-Local Buffer
+
 ```cpp
 static thread_local std::vector<double> M_buffer(65536);
-// Each thread has its own buffer, reused across calls
 ```
 
-### 3. 编译器优�?[CMakeLists.txt L8-10]
+Each thread owns its buffer and reuses it across calls.
+
+### Compiler Flags
+
 ```cmake
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native -ffast-math -flto ...")
 ```
 
----
+## Modified Files
 
-## 文件修改列表
+- `src/align.cpp`: parallelized map-alignment functions and optimized `ini_SCO`.
+- `CMakeLists.txt`: added release optimization flags.
+- `include/align.h`: confirmed inline-function optimization.
 
-- �?[align.cpp](align.cpp) - 3个mapalignment函数并行化，ini_SCO优化
-- �?[CMakeLists.txt](CMakeLists.txt) - 编译优化标志
-- �?[align.h](align.h) - 确认inline函数优化
+## Future Improvements
 
----
+1. Profile-guided optimization with PGO.
+2. Manual SIMD vectorization for matrix operations.
+3. CUDA or OpenCL acceleration for compute-heavy kernels.
+4. Improved parameter-search strategy to reduce unnecessary runs.
+5. Better data-access patterns for higher cache hit rates.
 
-## 下一步改进建�?
-
-1. **Profile-guided优化**: 使用PGO（Profile-Guided Optimization�?
-2. **SIMD向量�?*: 手动编写SSE/AVX代码加速矩阵运�?
-3. **GPU加�?*: 使用CUDA/OpenCL加速计算密集部�?
-4. **算法改进**: 改进参数搜索策略，减少不必要的计�?
-5. **内存优化**: 改进数据访问模式，提高缓存命中率
-
----
-
-## 性能测试
-
-使用以下命令测试性能提升�?
+## Performance Test
 
 ```bash
-# 构建release版本
 cmake . -DCMAKE_BUILD_TYPE=Release
 make -j8
-
-# 测试执行时间
 time ./bin/RESM_Search_align -a query.dbn -b target.fa
 
-# 与Debug版本比较（应该快5-8倍）
 cmake . -DCMAKE_BUILD_TYPE=Debug
 make -j8
 time ./bin/RESM_Search_align -a query.dbn -b target.fa
 ```
 
----
-
-**优化完成日期**: 2026-05-11
+Optimization completion date: 2026-05-11
